@@ -1,80 +1,158 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interaktywna makieta deweloperska</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
             background: #f5f5f5;
         }
-        h1 { 
-            text-align: center; 
-            color: #333; 
+        h1 {
+            text-align: center;
+            color: #333;
             margin-bottom: 30px;
         }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             border-radius: 8px;
         }
-        .map-container { 
-            position: relative; 
-            text-align: center;
+        .map-container {
+            position: relative;
+            display: inline-block;
         }
-        img { 
-            max-width: 100%; 
-            height: auto; 
+        #map-image {
+            max-width: 100%;
+            height: auto;
             border: 1px solid #ddd;
         }
-        /* Efekt podświetlenia obszarów */
-        area {
-            cursor: pointer;
-            transition: all 0.3s;
+        .highlight-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
-        area:hover {
-            opacity: 0.7;
+        .highlight {
+            position: absolute;
+            background-color: transparent;
+            pointer-events: none;
+            border: 3px solid;
+            border-radius: 3px;
+            display: none;
         }
-        /* Kolory statusów lokali */
-        .wolny:hover { background-color: rgba(0, 255, 0, 0.3); }
-        .rezerwacja:hover { background-color: rgba(255, 255, 0, 0.3); }
-        .sprzedany:hover { background-color: rgba(255, 0, 0, 0.3); }
+        .wolny { border-color: green; }
+        .rezerwacja { border-color: yellow; }
+        .sprzedany { border-color: red; }
+        .legenda {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .legenda span {
+            display: inline-block;
+            padding: 5px 15px;
+            margin: 0 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Makieta inwestycji deweloperskiej</h1>
+        
+        <div class="legenda">
+            <span style="background: rgba(0, 255, 0, 0.2); border: 1px solid green;">Wolne</span>
+            <span style="background: rgba(255, 255, 0, 0.2); border: 1px solid yellow;">Rezerwacja</span>
+            <span style="background: rgba(255, 0, 0, 0.2); border: 1px solid red;">Sprzedane</span>
+        </div>
+        
         <div class="map-container">
-            <!-- Tutaj wstaw swoją grafikę makiety -->
-            <img src="Cała - kolor_compressed.jpg" usemap="#image-map" alt="Makieta inwestycji">
+            <img id="map-image" src="Cała - kolor_compressed.jpg" usemap="#image-map" alt="Makieta inwestycji">
+            <div class="highlight-overlay" id="highlight-overlay"></div>
             
-            <!-- Mapa klikalnych obszarów -->
             <map name="image-map">
-                <!-- LOKAL 1 (zielony - wolny) -->
-                <area target="" alt="LOKAL 1" title="LOKAL 1" href="lokal1.html" 
+                <area data-id="lokal1" alt="LOKAL 1" title="LOKAL 1 - Wolny" href="lokal1.html" 
                       coords="1479,1834,1463,1182,1876,790,2459,975,2072,1394,2067,1759,1982,1807,1977,1850,2046,1844,2035,2035,1866,1966,1701,1982,1707,1913" 
-                      shape="poly" class="wolny">
-
-                <!-- LOKAL 2 (żółty - rezerwacja) -->
-                <area target="" alt="LOKAL 2" title="LOKAL 2" href="lokal2.html" 
+                      shape="poly" data-status="wolny">
+                      
+                <area data-id="lokal2" alt="LOKAL 2" title="LOKAL 2 - Rezerwacja" href="lokal2.html" 
                       coords="2051,2046,2072,1388,2465,980,3016,1177,2655,1579,2640,2263,2348,2146,2263,2189,2263,2125" 
-                      shape="poly" class="rezerwacja">
-
-                <!-- LOKAL 3 (czerwony - sprzedany) -->
-                <area target="" alt="LOKAL 3" title="LOKAL 3" href="lokal3.html" 
+                      shape="poly" data-status="rezerwacja">
+                      
+                <area data-id="lokal3" alt="LOKAL 3" title="LOKAL 3 - Sprzedany" href="lokal3.html" 
                       coords="3027,1187,2645,1585,2629,2231,2899,2321,2894,2390,2989,2364,3270,2448,3292,1812,3684,1394" 
-                      shape="poly" class="sprzedany">
-
-                <!-- LOKAL 4 (zielony - wolny) -->
-                <area target="" alt="LOKAL 4" title="LOKAL 4" href="lokal4.html" 
+                      shape="poly" data-status="sprzedany">
+                      
+                <area data-id="lokal4" alt="LOKAL 4" title="LOKAL 4 - Wolny" href="lokal4.html" 
                       coords="3270,2464,3292,1823,3684,1404,4776,1749,4776,2433,3938,2676,3594,2565,3482,2607,3482,2533" 
-                      shape="poly" class="wolny">
+                      shape="poly" data-status="wolny">
             </map>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const img = document.getElementById('map-image');
+            const overlay = document.getElementById('highlight-overlay');
+            const areas = document.querySelectorAll('area');
+            
+            // Tworzymy dynamiczny element podświetlenia
+            const highlight = document.createElement('div');
+            highlight.className = 'highlight';
+            overlay.appendChild(highlight);
+            
+            // Funkcja do obliczania pozycji
+            function calculatePosition(coords) {
+                const coordArray = coords.split(',').map(Number);
+                const xCoords = coordArray.filter((_, i) => i % 2 === 0);
+                const yCoords = coordArray.filter((_, i) => i % 2 !== 0);
+                
+                return {
+                    left: Math.min(...xCoords),
+                    top: Math.min(...yCoords),
+                    width: Math.max(...xCoords) - Math.min(...xCoords),
+                    height: Math.max(...yCoords) - Math.min(...yCoords)
+                };
+            }
+            
+            // Obsługa zdarzeń
+            areas.forEach(area => {
+                area.addEventListener('mouseenter', function() {
+                    const pos = calculatePosition(this.getAttribute('coords'));
+                    const status = this.getAttribute('data-status');
+                    
+                    highlight.style.display = 'block';
+                    highlight.style.left = pos.left + 'px';
+                    highlight.style.top = pos.top + 'px';
+                    highlight.style.width = pos.width + 'px';
+                    highlight.style.height = pos.height + 'px';
+                    highlight.className = 'highlight ' + status;
+                });
+                
+                area.addEventListener('mouseleave', function() {
+                    highlight.style.display = 'none';
+                });
+            });
+            
+            // Dostosowanie do zmiany rozmiaru obrazu
+            new ResizeObserver(() => {
+                const activeArea = document.querySelector('area:hover');
+                if (activeArea) {
+                    const pos = calculatePosition(activeArea.getAttribute('coords'));
+                    highlight.style.left = pos.left + 'px';
+                    highlight.style.top = pos.top + 'px';
+                }
+            }).observe(img);
+        });
+    </script>
 </body>
 </html>
